@@ -1,0 +1,128 @@
+package uz.salikhdev.google_lms.service.user;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import uz.salikhdev.google_lms.domain.dto.request.CreateUserRequest;
+import uz.salikhdev.google_lms.domain.dto.request.LoginRequest;
+import uz.salikhdev.google_lms.domain.dto.request.UpdateUserRequest;
+import uz.salikhdev.google_lms.domain.dto.response.LoginResponse;
+import uz.salikhdev.google_lms.domain.entity.user.User;
+import uz.salikhdev.google_lms.domain.entity.user.User.Role;
+import uz.salikhdev.google_lms.exception.BadRequestException;
+import uz.salikhdev.google_lms.exception.ConflictException;
+import uz.salikhdev.google_lms.exception.NotFoundException;
+import uz.salikhdev.google_lms.repository.UserRepository;
+import uz.salikhdev.google_lms.service.jwt.JwtService;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
+@Service
+@RequiredArgsConstructor
+public class UserService {
+
+    private final UserRepository userRepository;
+    private final JwtService jwtService;
+    private final PasswordEncoder encoder;
+
+
+    public void createStudent(CreateUserRequest request) {
+        createUser(request, Role.STUDENT);
+    }
+
+    public void createTeacher(CreateUserRequest request) {
+        createUser(request, Role.TEACHER);
+    }
+
+    public void createAdmin(CreateUserRequest request) {
+        createUser(request, Role.ADMIN);
+    }
+
+    public void createCashier(CreateUserRequest request) {
+        createUser(request, Role.CASHIER);
+    }
+
+    private void createUser(CreateUserRequest request, Role role) {
+
+        if (userRepository.existsByEmail(request.email())) {
+            throw new ConflictException("Email already in use");
+        }
+
+        User user = User.builder()
+                .email(request.email())
+                .firstName(request.firstName())
+                .lastName(request.lastName())
+                .birthDate(request.birthDate())
+                .password(encoder.encode(request.password()))
+                .role(role)
+                .status(User.Status.ACTIVE)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        userRepository.save(user);
+    }
+
+    public void updateUser(User authUser, Long userId, UpdateUserRequest userRequest) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ConflictException("User not found"));
+
+        // role based restrictions
+        if (authUser.getRole().equals(Role.CEO)) {
+            if (user.getRole().equals(Role.TEACHER) || user.getRole().equals(Role.STUDENT)) {
+                throw new BadRequestException("CEO cannot update TEACHER or STUDENT");
+            }
+        } else if (authUser.getRole().equals(Role.ADMIN)) {
+            if (user.getRole().equals(Role.CEO)) {
+                throw new BadRequestException("ADMIN cannot update CEO");
+            }
+        }
+
+
+        // update fields
+        if (userRequest.email() != null) {
+            if (userRepository.existsByEmail(userRequest.email())) {
+                throw new ConflictException("Email already in use");
+            }
+            user.setEmail(userRequest.email());
+        }
+
+        if (userRequest.firstName() != null) {
+            user.setFirstName(userRequest.firstName());
+        }
+
+        if (userRequest.lastName() != null) {
+            user.setLastName(userRequest.lastName());
+        }
+
+        if (userRequest.birthDate() != null) {
+            user.setBirthDate(userRequest.birthDate());
+        }
+
+        userRepository.save(user);
+    }
+
+    public LoginResponse login(LoginRequest request) {
+
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        if (!encoder.matches(request.password(), user.getPassword())) {
+            throw new BadRequestException("Invalid credentials");
+        }
+
+        if (user.getStatus() != User.Status.ACTIVE) {
+            throw new BadRequestException("User is not active");
+        }
+
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("id", user.getId().toString());
+        claims.put("role", user.getRole().name());
+
+        String token = jwtService.generateToken(claims, user);
+
+        return new LoginResponse(token, jwtService.getExpirationTime());
+    }
+}
