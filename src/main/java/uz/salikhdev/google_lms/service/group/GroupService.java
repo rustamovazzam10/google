@@ -4,14 +4,18 @@ package uz.salikhdev.google_lms.service.group;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uz.salikhdev.google_lms.domain.dto.request.CreateGroupRequest;
+import uz.salikhdev.google_lms.domain.dto.request.UpdateGroupRequest;
+import uz.salikhdev.google_lms.domain.dto.response.GroupResponse;
 import uz.salikhdev.google_lms.domain.entity.academic.Course;
 import uz.salikhdev.google_lms.domain.entity.academic.Group;
 import uz.salikhdev.google_lms.domain.entity.user.User;
 import uz.salikhdev.google_lms.exception.NotFoundException;
+import uz.salikhdev.google_lms.mapper.GroupMapper;
 import uz.salikhdev.google_lms.repository.CourseRepository;
 import uz.salikhdev.google_lms.repository.GroupRepository;
 import uz.salikhdev.google_lms.repository.UserRepository;
 
+import java.util.List;
 import java.util.Random;
 
 @Service
@@ -22,6 +26,7 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final CourseRepository courseRepository;
     private final UserRepository userRepository;
+    private final GroupMapper groupMapper;
     private final Random random;
 
 
@@ -55,9 +60,36 @@ public class GroupService {
         groupRepository.save(group);
     }
 
-    public void getAllGroups() {
+    public List<GroupResponse> getAllGroups() {
+        List<Group> groups = groupRepository.findAll();
+        return groupMapper.toResponse(groups);
+
 
     }
 
 
+    public void update(Long groupId, UpdateGroupRequest request, User authUser) {
+      Group group = groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found"));
+        Course course = courseRepository.findById(request.courseId())
+                .orElseThrow(() -> new NotFoundException("Course not found"));
+        User mentor = userRepository.findById(request.mentorId())
+                .orElseThrow(() -> new NotFoundException("Mentor not found"));
+        group.setCourse(course);
+        group.setMentor(mentor);
+        group.setStartTime(request.startTime());
+        group.setEndTime(request.endTime());
+        group.setCapacity(request.capacity());
+        group.setName(request.name());
+        group.setStatus(request.status());
+        group.setNumber(request.number());
+        groupRepository.save(group);
+
+
+
+
+    }
+
+    public void delete(Long groupId) {
+        groupRepository.deleteById(groupId);
+    }
 }
