@@ -47,7 +47,7 @@ public class UserSpecification {
 
                 // STATUS
                 if (status != null) {
-                    predicates = criteriaBuilder.and(predicates, criteriaBuilder.equal(root.get("status"), status));
+                    predicates = criteriaBuilder.and(predicates, criteriaBuilder.equal(root.get("code"), status));
                 }
 
                 // TYPE

@@ -10,11 +10,9 @@ import java.math.BigDecimal;
 
 @Builder
 public record CourseRequest(
-        @JsonProperty("name")
         @NotNull(message = "Name is required")
         @NotBlank(message = "Name cannot be blank")
         String name,
-        @JsonProperty("price")
         @NotNull(message = "Price is required")
         BigDecimal price
 ) {

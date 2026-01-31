@@ -47,8 +47,7 @@ public class GlobalExceptionHandler {
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .message("Validation error")
-                .status(HttpStatus.BAD_REQUEST.value())
-                .timestamp(LocalDateTime.now())
+                .code(HttpStatus.BAD_REQUEST.value())
                 .errors(errors)
                 .build();
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);

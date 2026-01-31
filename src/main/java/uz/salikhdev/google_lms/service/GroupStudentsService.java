@@ -2,10 +2,8 @@ package uz.salikhdev.google_lms.service;
 
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 import uz.salikhdev.google_lms.domain.dto.request.GroupStudentsRequest;
-import uz.salikhdev.google_lms.domain.dto.request.UpdateGroupStudentsRequest;
 import uz.salikhdev.google_lms.domain.dto.request.UserResponse;
 import uz.salikhdev.google_lms.domain.dto.response.GroupResponse;
 import uz.salikhdev.google_lms.domain.entity.academic.Group;
@@ -33,13 +31,24 @@ public class GroupStudentsService {
 
 
     public void join(GroupStudentsRequest request) {
+
+        Group group = groupRepository.findById(request.groupId())
+                .orElseThrow(() -> new NotFoundException("Group not found"));
+
+        if (group.getStatus() != Group.Status.ACTIVE) {
+            throw new BadRequestException("Cannot join inactive group");
+        }
+
+        if (group.getCapacity() <= 0) {
+            throw new BadRequestException("Group capacity is full");
+        }
+
         User student = userRepository.findByIdAndStatus(request.studentId(), User.Status.ACTIVE)
                 .orElseThrow(()-> new NotFoundException("Student not found"));
+
         if(student.getRole() != User.Role.STUDENT){
             throw new BadRequestException("Only student can join");
         }
-        Group group = groupRepository.findById(request.groupId())
-                .orElseThrow(()-> new NotFoundException("Group not found"));
 
         GroupStudents groupStudents = GroupStudents.builder()
                 .student(student)
@@ -48,27 +57,25 @@ public class GroupStudentsService {
                 .status(GroupStudents.Status.ACTIVE)
                 .build();
         groupStudentsRepository.save(groupStudents);
-    }
-    public void update(UpdateGroupStudentsRequest request) {
-        User student = userRepository.findByIdAndStatus(request.studentId(), User.Status.ACTIVE)
-                .orElseThrow(()-> new NotFoundException("Student not found"));
-        Group group = groupRepository.findById(request.groupId())
-                .orElseThrow(()-> new NotFoundException("Group not found"));
-        GroupStudents groupStudents = groupStudentsRepository.findById(request.groupStudentsId())
-                .orElseThrow(()-> new NotFoundException("GroupStudents not found"));
-        groupStudents.setJoinedAt(LocalDate.now());
-        groupStudents.setStatus(GroupStudents.Status.ACTIVE);
-        groupStudents.setStudent(student);
-        groupStudents.setGroup(group);
-        groupStudentsRepository.save(groupStudents);
+        group.setCapacity(group.getCapacity() - 1);
+        groupRepository.save(group);
     }
 
     public List<UserResponse> getStudents(Long groupId) {
-        List<User> students = groupStudentsRepository.findByGroupId(groupId);
-        return userMapper.usersToUserResponses(students);
+        List<GroupStudents> groupStudents = groupStudentsRepository.findAllByGroup_Id(groupId);
+        return userMapper.toResponse(
+                groupStudents.stream()
+                        .map(GroupStudents::getStudent)
+                        .toList()
+        );
     }
     public List<GroupResponse> getGroups(Long studentId) {
-        List<Group> groups= groupStudentsRepository.findByStudentId(studentId);
-        return groupMapper.toResponse(groups);
+        List<GroupStudents> groupStudents = groupStudentsRepository.findAllByStudent_Id(studentId);
+
+        return groupMapper.toResponse(
+                groupStudents.stream()
+                        .map(GroupStudents::getGroup)
+                        .toList()
+        );
     }
 }

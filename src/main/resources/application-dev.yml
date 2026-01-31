@@ -55,5 +55,5 @@ springdoc:
 
 jwt:
   secret: rewfrfwtgerf345fgtrds2ewcef32wcvtby67hjuhygfxx2weedfr45t6y7hu8ijn
-  expiration: 360000
+  expiration: 36000000
 

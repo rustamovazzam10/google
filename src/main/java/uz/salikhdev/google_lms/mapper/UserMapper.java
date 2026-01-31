@@ -13,7 +13,7 @@ public interface UserMapper {
 
     @Mapping(target = "id", source = "id")
     @Mapping(target = "fullName", expression = "java(user.getFirstName() + \" \" + user.getLastName())")
-    UserResponse userToUserResponse(User user);
+    UserResponse toResponse(User user);
 
-    List<UserResponse> usersToUserResponses(List<User> users);
+    List<UserResponse> toResponse(List<User> users);
 }

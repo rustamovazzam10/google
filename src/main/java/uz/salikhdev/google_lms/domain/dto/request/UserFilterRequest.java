@@ -11,17 +11,11 @@ import java.time.LocalDateTime;
 
 @Builder
 public record UserFilterRequest(
-        @JsonProperty("search")
         String search,
-        @JsonProperty("status")
         User.Status status,
-        @JsonProperty("role")
         User.Role role,
-        @JsonProperty("user_id")
         Long userId,
-        @JsonProperty("from_date")
         LocalDate fromDate,
-        @JsonProperty("to_date")
         LocalDate toDate
 ) {
 }

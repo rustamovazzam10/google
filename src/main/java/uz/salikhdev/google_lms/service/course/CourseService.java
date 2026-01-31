@@ -2,9 +2,7 @@ package uz.salikhdev.google_lms.service.course;
 
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import uz.salikhdev.google_lms.domain.dto.request.CourseRequest;
 import uz.salikhdev.google_lms.domain.dto.request.UpdateCourseRequest;
 import uz.salikhdev.google_lms.domain.dto.response.CourseResponse;
@@ -40,9 +38,17 @@ public class CourseService {
     }
 
     public void update(Long courseId, UpdateCourseRequest request) {
-        Course course = courseRepository.findById(courseId).orElseThrow(() -> new NotFoundException("Course not found"));
-        course.setName(request.name());
-        course.setPrice(request.price());
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new NotFoundException("Course not found"));
+
+        if (request.name() != null && !request.name().isBlank()) {
+            course.setName(request.name());
+        }
+
+        if (request.price() != null) {
+            course.setPrice(request.price());
+        }
+
         courseRepository.save(course);
     }
 

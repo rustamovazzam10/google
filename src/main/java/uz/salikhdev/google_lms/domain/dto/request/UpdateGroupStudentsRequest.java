@@ -6,11 +6,8 @@ import lombok.Builder;
 
 @Builder
 public record UpdateGroupStudentsRequest(
-        @JsonProperty("groupId")
         Long groupId,
-        @JsonProperty("studentId")
         Long studentId,
-        @JsonProperty("groupStudentsId")
         Long groupStudentsId
 ) {
 }

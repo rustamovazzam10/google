@@ -12,7 +12,7 @@ import uz.salikhdev.google_lms.exception.ConflictException;
 import uz.salikhdev.google_lms.exception.NotFoundException;
 import uz.salikhdev.google_lms.mapper.UserMapper;
 import uz.salikhdev.google_lms.repository.UserRepository;
-import uz.salikhdev.google_lms.service.jwt.JwtService;
+import uz.salikhdev.google_lms.service.security.JwtService;
 import uz.salikhdev.google_lms.specification.UserSpecification;
 
 import java.time.LocalDateTime;
@@ -140,7 +140,7 @@ public class UserService {
 
 
         List<User> users = userRepository.findAll(specification);
-        return userMapper.usersToUserResponses(users);
+        return userMapper.toResponse(users);
 
     }
 }

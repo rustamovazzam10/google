@@ -81,5 +81,4 @@ public class AppConfig {
         return username -> repository.findByEmail(username)
                 .orElseThrow(() -> new NotFoundException("User not found"));
     }
-
 }
