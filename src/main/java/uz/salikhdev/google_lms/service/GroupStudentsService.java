@@ -7,7 +7,7 @@ import uz.salikhdev.google_lms.domain.dto.request.GroupStudentsRequest;
 import uz.salikhdev.google_lms.domain.dto.request.UserResponse;
 import uz.salikhdev.google_lms.domain.dto.response.GroupResponse;
 import uz.salikhdev.google_lms.domain.entity.academic.Group;
-import uz.salikhdev.google_lms.domain.entity.academic.GroupStudents;
+import uz.salikhdev.google_lms.domain.entity.academic.GroupStudent;
 import uz.salikhdev.google_lms.domain.entity.user.User;
 import uz.salikhdev.google_lms.exception.BadRequestException;
 import uz.salikhdev.google_lms.exception.NotFoundException;
@@ -50,11 +50,11 @@ public class GroupStudentsService {
             throw new BadRequestException("Only student can join");
         }
 
-        GroupStudents groupStudents = GroupStudents.builder()
+        GroupStudent groupStudents = GroupStudent.builder()
                 .student(student)
                 .group(group)
                 .joinedAt(LocalDate.now())
-                .status(GroupStudents.Status.ACTIVE)
+                .status(GroupStudent.Status.ACTIVE)
                 .build();
         groupStudentsRepository.save(groupStudents);
         group.setCapacity(group.getCapacity() - 1);
@@ -62,19 +62,19 @@ public class GroupStudentsService {
     }
 
     public List<UserResponse> getStudents(Long groupId) {
-        List<GroupStudents> groupStudents = groupStudentsRepository.findAllByGroup_Id(groupId);
+        List<GroupStudent> groupStudents = groupStudentsRepository.findAllByGroup_Id(groupId);
         return userMapper.toResponse(
                 groupStudents.stream()
-                        .map(GroupStudents::getStudent)
+                        .map(GroupStudent::getStudent)
                         .toList()
         );
     }
     public List<GroupResponse> getGroups(Long studentId) {
-        List<GroupStudents> groupStudents = groupStudentsRepository.findAllByStudent_Id(studentId);
+        List<GroupStudent> groupStudents = groupStudentsRepository.findAllByStudent_Id(studentId);
 
         return groupMapper.toResponse(
                 groupStudents.stream()
-                        .map(GroupStudents::getGroup)
+                        .map(GroupStudent::getGroup)
                         .toList()
         );
     }

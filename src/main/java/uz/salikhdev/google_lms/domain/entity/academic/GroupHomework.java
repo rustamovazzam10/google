@@ -1,9 +1,6 @@
 package uz.salikhdev.google_lms.domain.entity.academic;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -16,16 +13,16 @@ import lombok.experimental.SuperBuilder;
 import uz.salikhdev.google_lms.domain.entity.base.BaseEntity;
 import uz.salikhdev.google_lms.domain.entity.user.User;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@SuperBuilder
 @ToString
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "group_students")
-public class GroupStudents extends BaseEntity {
+@Entity(name = "group_homework")
+public class GroupHomework extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id", nullable = false)
@@ -33,19 +30,17 @@ public class GroupStudents extends BaseEntity {
     private Group group;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id", nullable = false)
+    @JoinColumn(name = "homework_id", nullable = false)
     @ToString.Exclude
-    private User student;
+    private Homework homework;
 
-    @Column(name = "joined_at", nullable = false)
-    private LocalDate joinedAt;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_id", nullable = false)
+    @ToString.Exclude
+    private User creator;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private Status status;
+    private LocalDateTime deadline;
 
-    public enum Status {
-        ACTIVE,
-        FINISHED
-    }
+    private Boolean isSubmitted;
+
 }

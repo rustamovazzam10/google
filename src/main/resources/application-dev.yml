@@ -8,6 +8,11 @@ spring:
     password: password
     driver-class-name: org.postgresql.Driver
 
+  servlet:
+    multipart:
+      max-file-size: 1GB
+      max-request-size: 1GB
+
   data:
     redis:
       host: localhost
@@ -30,19 +35,6 @@ spring:
   banner:
     location: banner/banner-dev.txt
 
-#  mail:
-#    enable : true
-#    host: smtp.gmail.com
-#    port: 587
-#    username: fffastul1@gmail.com
-#    password: jyox ejmn svya qjyr
-#    properties:
-#      mail:
-#        smtp:
-#          auth: true
-#          starttls:
-#            enable: true
-
 springdoc:
   swagger-ui:
     path: /docs
@@ -56,4 +48,10 @@ springdoc:
 jwt:
   secret: rewfrfwtgerf345fgtrds2ewcef32wcvtby67hjuhygfxx2weedfr45t6y7hu8ijn
   expiration: 36000000
+
+minio:
+  url: http://localhost:9000
+  access-key: user
+  secret-key: password
+  bucket-name: google-shop-bucket
 

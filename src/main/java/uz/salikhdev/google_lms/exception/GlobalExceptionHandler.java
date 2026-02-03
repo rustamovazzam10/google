@@ -1,5 +1,6 @@
 package uz.salikhdev.google_lms.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -50,11 +52,13 @@ public class GlobalExceptionHandler {
                 .code(HttpStatus.BAD_REQUEST.value())
                 .errors(errors)
                 .build();
+        log.error("Unhandled exception: ", ex);
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGeneralException(Exception ex) {
+        log.error("Unhandled exception: ", ex);
         return ErrorResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
     }
 
