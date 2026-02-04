@@ -3,20 +3,21 @@ package uz.salikhdev.google_lms.service.user;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import uz.salikhdev.google_lms.domain.dto.request.CreateUserRequest;
-import uz.salikhdev.google_lms.domain.dto.request.LoginRequest;
-import uz.salikhdev.google_lms.domain.dto.request.UpdateUserRequest;
+import uz.salikhdev.google_lms.domain.dto.request.*;
 import uz.salikhdev.google_lms.domain.dto.response.LoginResponse;
 import uz.salikhdev.google_lms.domain.entity.user.User;
 import uz.salikhdev.google_lms.domain.entity.user.User.Role;
 import uz.salikhdev.google_lms.exception.BadRequestException;
 import uz.salikhdev.google_lms.exception.ConflictException;
 import uz.salikhdev.google_lms.exception.NotFoundException;
+import uz.salikhdev.google_lms.mapper.UserMapper;
 import uz.salikhdev.google_lms.repository.UserRepository;
-import uz.salikhdev.google_lms.service.jwt.JwtService;
+import uz.salikhdev.google_lms.service.security.JwtService;
+import uz.salikhdev.google_lms.specification.UserSpecification;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -26,6 +27,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final PasswordEncoder encoder;
+    private final UserMapper userMapper;
 
 
     public void createStudent(CreateUserRequest request) {
@@ -124,5 +126,21 @@ public class UserService {
         String token = jwtService.generateToken(claims, user);
 
         return new LoginResponse(token, jwtService.getExpirationTime());
+    }
+
+    public List<UserResponse> getAllUsers(UserFilterRequest filter) {
+        var specification = UserSpecification.filterUsers(
+                filter.search(),
+                filter.userId(),
+                filter.status(),
+                filter.role(),
+                filter.fromDate(),
+                filter.toDate()
+                );
+
+
+        List<User> users = userRepository.findAll(specification);
+        return userMapper.toResponse(users);
+
     }
 }

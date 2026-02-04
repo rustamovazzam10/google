@@ -44,7 +44,7 @@ dependencies {
     implementation("io.minio:minio:8.6.0")
 
     // OpenAPI
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1")
 
     // PostgreSQL Driver
     runtimeOnly("org.postgresql:postgresql")

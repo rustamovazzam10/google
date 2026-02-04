@@ -27,8 +27,7 @@ public class TokenAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
         ErrorResponse body = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(response.getStatus())
+                .code(response.getStatus())
                 .message("Error : " + authException.getMessage())
                 .build();
 
